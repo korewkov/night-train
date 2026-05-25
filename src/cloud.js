@@ -218,7 +218,7 @@
 
       if (currentUser) {
         setInfo('Аккаунт создан. Загружаю облачный прогресс...');
-        await loadCloudProgress();
+        await loadCloudProgress('story-01');
         closeAuthModal();
       } else {
         setInfo('Аккаунт создан. Проверь почту для подтверждения входа.');
@@ -245,7 +245,7 @@
 
       currentUser = data.user || null;
       updateAuthUI();
-      await loadCloudProgress();
+      await loadCloudProgress('story-01');
       closeAuthModal();
     } catch (error) {
       console.warn(error);
@@ -269,14 +269,14 @@
     setInfo('Можно продолжать локально — вход нужен только для облачного сохранения.');
   }
 
-  async function loadCloudProgress() {
+  async function loadCloudProgress(storyId = 'story-01') {
     if (!client || !currentUser) return;
 
     const { data, error } = await client
       .from('game_progress')
       .select('state_json, updated_at')
       .eq('user_id', currentUser.id)
-      .eq('story_id', 'story-01')
+      .eq('story_id', storyId)
       .maybeSingle();
 
     if (error) {
@@ -286,7 +286,7 @@
     }
 
     if (data?.state_json && typeof onLoadProgress === 'function') {
-      onLoadProgress(data.state_json);
+      onLoadProgress(data.state_json, storyId);
       setInfo('Облачный прогресс загружен');
     } else {
       setInfo('Облачное сохранение подключено. Пока сохранений нет.');
@@ -302,7 +302,10 @@
         {
           user_id: currentUser.id,
           story_id: storyId,
-          state_json: state,
+          state_json: {
+            ...state,
+            storyId
+          },
           updated_at: new Date().toISOString()
         },
         {
@@ -329,48 +332,51 @@
     }, 600);
   }
 
- async function saveResult(storyId, endingType, state) {
-  if (!client || !currentUser || !endingType || !state) return;
+  async function saveResult(storyId, endingType, state) {
+    if (!client || !currentUser || !endingType || !state) return;
 
-  const resultPayload = {
-    user_id: currentUser.id,
-    user_email: currentUser.email || null,
-    story_id: storyId,
-    ending_type: endingType,
+    const resultPayload = {
+      user_id: currentUser.id,
+      user_email: currentUser.email || null,
+      story_id: storyId,
+      ending_type: endingType,
 
-    conscience: state.conscience || 0,
-    courage: state.courage || 0,
-    empathy: state.empathy || 0,
-    discipline: state.discipline || 0,
-    trust_passengers: state.trustPassengers || 0,
+      conscience: state.conscience || 0,
+      courage: state.courage || 0,
+      empathy: state.empathy || 0,
+      discipline: state.discipline || 0,
+      trust_passengers: state.trustPassengers || 0,
 
-    ilya_trust: state.ilyaTrust || 0,
-    masha_trust: state.mashaTrust || 0,
-    oleg_trust: state.olegTrust || 0,
+      ilya_trust: state.ilyaTrust || 0,
+      masha_trust: state.mashaTrust || 0,
+      oleg_trust: state.olegTrust || 0,
 
-    helped_ilya: Boolean(state.helpedIlya),
-    masha_document_fixed: Boolean(state.mashaDocumentFixed),
-    masha_document_hidden: Boolean(state.mashaDocumentHidden),
-    fatal_document_violation: Boolean(state.fatalDocumentViolation),
-    helped_mother: Boolean(state.helpedMother),
-    crisis_resolved: Boolean(state.crisisResolved),
-    tragedy_flag: Boolean(state.tragedyFlag),
+      helped_ilya: Boolean(state.helpedIlya),
+      masha_document_fixed: Boolean(state.mashaDocumentFixed),
+      masha_document_hidden: Boolean(state.mashaDocumentHidden),
+      fatal_document_violation: Boolean(state.fatalDocumentViolation),
+      helped_mother: Boolean(state.helpedMother),
+      crisis_resolved: Boolean(state.crisisResolved),
+      tragedy_flag: Boolean(state.tragedyFlag),
 
-    state_json: state
-  };
+      state_json: {
+        ...state,
+        storyId
+      }
+    };
 
-  const { error } = await client
-    .from('game_results')
-    .insert(resultPayload);
+    const { error } = await client
+      .from('game_results')
+      .insert(resultPayload);
 
-  if (error) {
-    console.warn('Ошибка сохранения результата:', error.message);
-    setError('Результат не сохранён');
-    return;
+    if (error) {
+      console.warn('Ошибка сохранения результата:', error.message);
+      setError('Результат не сохранён');
+      return;
+    }
+
+    setInfo('Результат сохранён в облаке');
   }
-
-  setInfo('Результат сохранён в облаке');
-}
 
   async function init(options = {}) {
     onLoadProgress = options.onLoadProgress || null;
@@ -404,7 +410,7 @@
     updateAuthUI();
 
     if (currentUser) {
-      await loadCloudProgress();
+      await loadCloudProgress('story-01');
     }
 
     client.auth.onAuthStateChange(async (_event, session) => {
