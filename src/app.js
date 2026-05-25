@@ -53,14 +53,6 @@ const {
     }
     function byId(id) { return document.getElementById(id); }
 
-    function getStoryCoverBasePath(storyId) {
-      return `assets/images/covers/${storyId}/cover`;
-    }
-
-    function getStoryCoverCandidates(storyId) {
-      return SCENE_IMAGE_EXTENSIONS.map(extension => `${getStoryCoverBasePath(storyId)}.${extension}`);
-    }
-
     function setActiveNav(screenName) {
       const map = { menu: 'homeNavBtn', stories: 'storiesNavBtn', game: 'gameNavBtn' };
       ['homeNavBtn', 'storiesNavBtn', 'gameNavBtn'].forEach(id => byId(id)?.classList.remove('active'));
@@ -103,18 +95,24 @@ const {
       applyStoryCovers();
     }
 
-    function applyStoryCovers() {
-      document.querySelectorAll('[data-story-cover]').forEach((coverEl) => {
-        const storyId = coverEl.dataset.storyCover;
-        const fallback = 'radial-gradient(circle at 70% 20%, rgba(78,168,222,.20), transparent 30%), linear-gradient(135deg, rgba(26,56,92,.96), rgba(6,16,30,.98))';
+function applyStoryCovers() {
+  document.querySelectorAll('[data-story-cover]').forEach((coverEl) => {
+    const storyId = coverEl.dataset.storyCover;
+    const fallback = 'radial-gradient(circle at 70% 20%, rgba(78,168,222,.20), transparent 30%), linear-gradient(135deg, rgba(26,56,92,.96), rgba(6,16,30,.98))';
+
+    coverEl.style.backgroundImage = fallback;
+
+    window.GameMedia.loadFirstExistingImage(
+      window.GameMedia.getStoryCoverCandidates(storyId),
+      (src) => {
+        coverEl.style.backgroundImage = `url("${src}"), ${fallback}`;
+      },
+      () => {
         coverEl.style.backgroundImage = fallback;
-        loadFirstExistingImage(
-          getStoryCoverCandidates(storyId),
-          (src) => { coverEl.style.backgroundImage = `url("${src}"), ${fallback}`; },
-          () => { coverEl.style.backgroundImage = fallback; }
-        );
-      });
-    }
+      }
+    );
+  });
+}
 
     function openStory(storyId) {
       if (storyId !== ACTIVE_STORY) return;
@@ -227,61 +225,31 @@ const {
       byId('speakerRole').textContent = role.toUpperCase();
     }
 
-    function getScenePhotoBasePath(scene) {
-      const storyFolder = scene.story || ACTIVE_STORY;
-      const fileNumber = String(scene.photoIndex || 1).padStart(2, '0');
-      return `${SCENE_IMAGE_BASE_PATH}/${storyFolder}/${fileNumber}`;
-    }
+  function applyScenePhoto(scene) {
+  const imageEl = byId('characterCardImage');
+  if (!imageEl) return;
 
-    function getScenePhotoPath(scene, extension = SCENE_IMAGE_EXTENSIONS[0]) {
-      return `${getScenePhotoBasePath(scene)}.${extension}`;
-    }
+  const fallback = 'radial-gradient(circle at 50% 24%, rgba(169,194,230,.18), transparent 28%), linear-gradient(135deg, rgba(16,40,71,.96), rgba(7,17,31,.98))';
+  const candidates = window.GameMedia.getScenePhotoCandidates(scene, characters);
+  const scenePhotoKey = `${scene.story || ACTIVE_STORY}-${scene.photoIndex || 1}-${state.sceneId}`;
 
-    function getScenePhotoCandidates(scene) {
-      const baseCharacter = characters[scene.character] || characters.narrator;
-      const manualImage = scene.photo || scene.image || scene.cardImage || baseCharacter.card || '';
-      if (manualImage && manualImage.trim()) return [manualImage];
-      return SCENE_IMAGE_EXTENSIONS.map(extension => getScenePhotoPath(scene, extension));
-    }
+  imageEl.dataset.photoKey = scenePhotoKey;
+  imageEl.style.backgroundImage = fallback;
+  imageEl.style.backgroundSize = 'cover';
+  imageEl.style.backgroundPosition = 'center';
 
-    function loadFirstExistingImage(candidates, onSuccess, onError) {
-      const [current, ...rest] = candidates;
-      if (!current) {
-        onError?.();
-        return;
-      }
-
-      const img = new Image();
-      img.onload = () => onSuccess(current);
-      img.onerror = () => loadFirstExistingImage(rest, onSuccess, onError);
-      img.src = current;
-    }
-
-    function applyScenePhoto(scene) {
-      const imageEl = byId('characterCardImage');
-      if (!imageEl) return;
-
-      const fallback = 'radial-gradient(circle at 50% 24%, rgba(169,194,230,.18), transparent 28%), linear-gradient(135deg, rgba(16,40,71,.96), rgba(7,17,31,.98))';
-      const candidates = getScenePhotoCandidates(scene);
-      const scenePhotoKey = `${scene.story || ACTIVE_STORY}-${scene.photoIndex || 1}-${state.sceneId}`;
-
-      imageEl.dataset.photoKey = scenePhotoKey;
+  window.GameMedia.loadFirstExistingImage(
+    candidates,
+    (src) => {
+      if (imageEl.dataset.photoKey !== scenePhotoKey) return;
+      imageEl.style.backgroundImage = `url("${src}"), ${fallback}`;
+    },
+    () => {
+      if (imageEl.dataset.photoKey !== scenePhotoKey) return;
       imageEl.style.backgroundImage = fallback;
-      imageEl.style.backgroundSize = 'cover';
-      imageEl.style.backgroundPosition = 'center';
-
-      loadFirstExistingImage(
-        candidates,
-        (src) => {
-          if (imageEl.dataset.photoKey !== scenePhotoKey) return;
-          imageEl.style.backgroundImage = `url("${src}"), ${fallback}`;
-        },
-        () => {
-          if (imageEl.dataset.photoKey !== scenePhotoKey) return;
-          imageEl.style.backgroundImage = fallback;
-        }
-      );
     }
+  );
+}
 
     function updateOverlayDensity(scene) {
       const overlay = byId('sceneOverlay');
@@ -459,10 +427,10 @@ function restart() {
     function runSelfTests() {
       console.group('Первый рейс · self-tests');
       console.assert(Boolean(scenes.prologue && scenes.final_scene), 'Ключевые сцены существуют');
-      console.assert(getScenePhotoPath(scenes.prologue) === 'assets/images/scenes/story-01/01.webp', 'Первый кадр истории ищет webp');
-      console.assert(getScenePhotoPath(scenes.boarding_help) === 'assets/images/scenes/story-01/02.webp', 'Последствия посадки используют кадр 02');
-      console.assert(getScenePhotoPath(scenes.masha_document) === 'assets/images/scenes/story-01/04.webp', 'Блок Маши использует кадр 04');
-      console.assert(getScenePhotoPath(scenes.final_scene) === 'assets/images/scenes/story-01/12.webp', 'Финал использует кадр 12');
+   console.assert(window.GameMedia.getScenePhotoPath(scenes.prologue) === 'assets/images/scenes/story-01/01.webp', 'Первый кадр истории ищет webp');
+console.assert(window.GameMedia.getScenePhotoPath(scenes.boarding_help) === 'assets/images/scenes/story-01/02.webp', 'Последствия посадки используют кадр 02');
+console.assert(window.GameMedia.getScenePhotoPath(scenes.masha_document) === 'assets/images/scenes/story-01/04.webp', 'Блок Маши использует кадр 04');
+console.assert(window.GameMedia.getScenePhotoPath(scenes.final_scene) === 'assets/images/scenes/story-01/12.webp', 'Финал использует кадр 12');
 
       const originalState = JSON.parse(JSON.stringify(state));
 
