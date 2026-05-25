@@ -1,5 +1,7 @@
-'use strict';
-const STORAGE_KEY = 'first_raid_visual_novel_v3';
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'first_raid_visual_novel_v3';
     const ACTIVE_STORY = 'story-01';
     const SCENE_IMAGE_BASE_PATH = 'assets/images/scenes';
     const SCENE_IMAGE_EXTENSIONS = ['webp', 'jpg', 'jpeg', 'png'];
@@ -234,3 +236,4 @@ window.GameData = {
   scenes,
   SCENE_PHOTO_INDEX_BY_ID
 };
+    })();
