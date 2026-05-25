@@ -1,9 +1,12 @@
 'use strict';
 
-const GameStorage = {
+window.GameStorage = {
   load(key, fallbackState) {
     try {
-      const saved = JSON.parse(localStorage.getItem(key));
+      const savedRaw = localStorage.getItem(key);
+      if (!savedRaw) return fallbackState;
+
+      const saved = JSON.parse(savedRaw);
       return saved ? { ...fallbackState, ...saved } : fallbackState;
     } catch (error) {
       console.warn('Не удалось загрузить сохранение:', error);
