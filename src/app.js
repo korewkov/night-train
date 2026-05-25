@@ -239,17 +239,12 @@
     let state = loadState();
 
     function loadState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return saved ? { ...defaultState(), ...saved } : defaultState();
-      } catch (error) {
-        return defaultState();
-      }
-    }
+  return GameStorage.load(STORAGE_KEY, defaultState());
+}
 
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
+  function save() {
+  GameStorage.save(STORAGE_KEY, state);
+}
 
     function clampMoral(value) { return Math.max(-5, Math.min(8, value)); }
     function moralPercent(value) { return Math.round(((clampMoral(value) + 5) / 13) * 100); }
@@ -731,14 +726,15 @@
       modal.classList.add('show');
     }
 
-    function restart() {
-      state = defaultState();
-      save();
-      byId('endingModal').classList.remove('show');
-      byId('gameOverModal').classList.remove('show');
-      render();
-      toast('Первый рейс начался заново');
-    }
+  function restart() {
+  GameStorage.reset(STORAGE_KEY);
+  state = defaultState();
+  save();
+  byId('endingModal').classList.remove('show');
+  byId('gameOverModal').classList.remove('show');
+  render();
+  toast('Первый рейс начался заново');
+}
 
     function runSelfTests() {
       console.group('Первый рейс · self-tests');
