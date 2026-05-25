@@ -12,25 +12,18 @@ const {
   ENDINGS
 } = window.GameData;
 
-    function defaultState() {
-      return {
-        sceneId: 'prologue', selected: {}, debuffs: [], storyPath: [],
-        conscience: 0, courage: 0, empathy: 0, discipline: 0, trustPassengers: 0,
-        ilyaTrust: 0, mashaTrust: 0, olegTrust: 0,
-        helpedIlya: false, alienatedIlya: false, mashaDocumentFixed: false, mashaDocumentHidden: false, fatalDocumentViolation: false, betrayedMasha: false, pressuredMasha: false,
-        ignoredOleg: false, humiliatedOleg: false, helpedMother: false, childDrawing: false, admittedMistake: false,
-        crisisResolved: false, tragedyFlag: false, finished: false, gameOver: false, endingType: null
-      };
-    }
+   function defaultState() {
+  return window.GameState.createDefaultState();
+}
 
     let state = loadState();
 
-    function loadState() {
-  return GameStorage.load(STORAGE_KEY, defaultState());
+   function loadState() {
+  return window.GameState.load(STORAGE_KEY);
 }
 
   function save() {
-  GameStorage.save(STORAGE_KEY, state);
+  window.GameState.save(STORAGE_KEY, state);
 }
 
     function clampMoral(value) { return Math.max(-5, Math.min(8, value)); }
@@ -454,9 +447,8 @@ const {
   modal.classList.add('show');
 }
 
-  function restart() {
-  GameStorage.reset(STORAGE_KEY);
-  state = defaultState();
+function restart() {
+  state = window.GameState.reset(STORAGE_KEY);
   save();
   byId('endingModal').classList.remove('show');
   byId('gameOverModal').classList.remove('show');
