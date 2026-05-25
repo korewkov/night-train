@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ночной поезд</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body class="theme-night">
+  <div id="app">
+    <!-- Экран авторизации -->
+    <section id="screen-auth" class="screen active">
+      <div class="auth-card">
+        <h1 class="title">🚂 Ночной поезд</h1>
+        <p class="subtitle">Войди или создай аккаунт, чтобы сохранять прогресс</p>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="login">Вход</button>
+          <button class="tab" data-tab="register">Регистрация</button>
+        </div>
+
+        <form id="form-login" class="auth-form active">
+          <input type="text" name="login" placeholder="Имя пользователя или email" required minlength="3" />
+          <input type="password" name="password" placeholder="Пароль" required minlength="8" />
+          <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+
+        <form id="form-register" class="auth-form">
+          <input type="text" name="username" placeholder="Имя пользователя" required minlength="3" maxlength="24" pattern="[\w\-]+" />
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Пароль (мин. 8 символов)" required minlength="8" />
+          <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+        </form>
+
+        <p class="auth-error" id="auth-error"></p>
+
+        <button id="btn-guest" class="btn btn-ghost">Играть без сохранения</button>
+      </div>
+    </section>
+
+    <!-- Главное меню -->
+    <section id="screen-menu" class="screen">
+      <header class="topbar">
+        <div class="user-info">
+          <span class="user-avatar">👤</span>
+          <span id="user-name">Гость</span>
+        </div>
+        <button id="btn-logout" class="btn btn-ghost btn-small">Выйти</button>
+      </header>
+
+      <div class="menu-content">
+        <h1 class="title">🚂 Ночной поезд</h1>
+        <p class="subtitle">Интерактивная история, где каждое решение меняет судьбу</p>
+
+        <div class="menu-buttons">
+          <button id="btn-new-game" class="btn btn-primary btn-large">Новая игра</button>
+          <button id="btn-continue" class="btn btn-secondary btn-large" disabled>Продолжить</button>
+          <button id="btn-load" class="btn btn-secondary btn-large">Загрузить сохранение</button>
+          <button id="btn-stats" class="btn btn-secondary btn-large">Статистика</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Экран игры (заглушка, наполним в Части 3) -->
+    <section id="screen-game" class="screen">
+      <header class="topbar">
+        <button id="btn-back-menu" class="btn btn-ghost btn-small">← Меню</button>
+        <button id="btn-save" class="btn btn-ghost btn-small">💾 Сохранить</button>
+      </header>
+      <div class="game-content">
+        <div id="scene-image" class="scene-image"></div>
+        <div id="scene-text" class="scene-text">Здесь будет история...</div>
+        <div id="scene-choices" class="scene-choices"></div>
+      </div>
+    </section>
+
+    <!-- Экран статистики (заглушка) -->
+    <section id="screen-stats" class="screen">
+      <header class="topbar">
+        <button id="btn-stats-back" class="btn btn-ghost btn-small">← Назад</button>
+      </header>
+      <div class="stats-content">
+        <h2>Статистика</h2>
+        <div id="stats-body">Загрузка...</div>
+      </div>
+    </section>
+
+    <!-- Модалка сохранений -->
+    <div id="modal-saves" class="modal">
+      <div class="modal-content">
+        <h3>Сохранения</h3>
+        <div id="saves-list"></div>
+        <button class="btn btn-ghost" data-close-modal>Закрыть</button>
+      </div>
+    </div>
+
+    <!-- Тосты -->
+    <div id="toast-container"></div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

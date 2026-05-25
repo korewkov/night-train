@@ -1,0 +1,15 @@
+.theme-night {
+  --bg: #0e1320;
+  --bg-elevated: #161c2e;
+  --bg-card: #1d2438;
+  --text: #e8ebf5;
+  --text-muted: #8b93a8;
+  --accent: #d4a574;
+  --accent-hover: #e8b985;
+  --danger: #c97064;
+  --success: #7cc97f;
+  --border: #2a3148;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: radial-gradient(ellipse at top, #1a2238 0%, var(--bg) 70%);
+  color: var(--text);
+}
