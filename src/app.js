@@ -1,5 +1,4 @@
-  <script>
-    'use strict';
+'use strict';
 
     const STORAGE_KEY = 'first_raid_visual_novel_v3';
     const ACTIVE_STORY = 'story-01';
@@ -815,4 +814,3 @@
     } else {
       init();
     }
-  </script>
