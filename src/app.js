@@ -8,7 +8,8 @@ const {
   STORY_LIBRARY,
   characters,
   scenes,
-  SCENE_PHOTO_INDEX_BY_ID
+  SCENE_PHOTO_INDEX_BY_ID,
+  ENDINGS
 } = window.GameData;
 
     function defaultState() {
@@ -436,25 +437,22 @@ const {
       byId('gameOverModal').classList.add('show');
     }
 
-    function showEnding() {
-      const modal = byId('endingModal');
-      if (!modal) return;
-      state.finished = true;
-      state.endingType = getEnding();
-      save();
-      const endings = {
-        provodnik: ['Проводник', 'Артём справился с первым рейсом. Не потому что всё сделал идеально, а потому что видел людей, не скрывал ошибки и не ушёл от кризиса.'],
-        po_raspisaniyu: ['По расписанию', 'Рейс завершён. Формально всё доведено до конца, но в решениях Артёма было больше порядка, чем живого участия. Следующий рейс должен быть сильнее.'],
-        ne_dopushen: ['Не допущен', 'Форма оказалась тяжелее, чем Артём думал. Он слишком часто прятался за неё, когда рядом были живые люди.'],
-        oboydetsya: ['Обойдётся', 'Техническая остановка. Холодный свет. Рация трещит. Самая опасная фраза в этой работе оказалась простой: “я думал, обойдётся”.'],
-        vtoroy_shans: ['Следующий рейс', 'Артём ошибался, но не провалил рейс. Он смог признать часть решений, удержать кризис и получить право на следующий рейс.']
-      };
-      const data = endings[state.endingType] || endings.po_raspisaniyu;
-      byId('endingTitle').textContent = data[0];
-      byId('endingText').textContent = data[1];
-      renderRemarks('remarksList');
-      modal.classList.add('show');
-    }
+   function showEnding() {
+  const modal = byId('endingModal');
+  if (!modal) return;
+
+  state.finished = true;
+  state.endingType = getEnding();
+  save();
+
+  const data = ENDINGS[state.endingType] || ENDINGS.po_raspisaniyu;
+
+  byId('endingTitle').textContent = data.title;
+  byId('endingText').textContent = data.text;
+
+  renderRemarks('remarksList');
+  modal.classList.add('show');
+}
 
   function restart() {
   GameStorage.reset(STORAGE_KEY);
