@@ -37,47 +37,137 @@
 
     const panel = document.createElement('div');
     panel.id = 'authPanel';
-    panel.className = 'auth-panel';
+    panel.className = 'auth-panel auth-panel--compact';
     panel.innerHTML = `
-      <input class="auth-input" id="authEmail" type="email" placeholder="email" autocomplete="email">
-      <input class="auth-input" id="authPassword" type="password" placeholder="пароль" autocomplete="current-password">
-      <button class="btn secondary" id="signInBtn" type="button">Войти</button>
-      <button class="btn secondary" id="signUpBtn" type="button">Регистрация</button>
-      <button class="btn secondary" id="signOutBtn" type="button" style="display:none;">Выйти</button>
+      <button class="btn secondary auth-open-btn" id="authOpenBtn" type="button">Войти</button>
+
+      <div class="auth-user-pill" id="authUserPill" style="display:none;">
+        <span class="auth-user-dot"></span>
+        <span class="auth-user-email" id="authUserEmail">вошёл</span>
+        <button class="auth-ghost-btn" id="signOutBtn" type="button">Выйти</button>
+      </div>
+
       <span class="auth-status" id="authStatus">локально</span>
     `;
 
     topActions.prepend(panel);
+
+    if (!byId('authModal')) {
+      const modal = document.createElement('div');
+      modal.id = 'authModal';
+      modal.className = 'auth-modal';
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <div class="auth-backdrop" id="authBackdrop"></div>
+
+        <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+          <button class="auth-close" id="authCloseBtn" type="button" aria-label="Закрыть окно входа">×</button>
+
+          <div class="auth-kicker">облачное сохранение</div>
+          <h2 id="authTitle">Вход в рейс</h2>
+          <p class="auth-copy">
+            Войди, чтобы прогресс сохранялся не только в браузере, но и в Supabase.
+          </p>
+
+          <label class="auth-field">
+            <span>Email</span>
+            <input class="auth-input" id="authEmail" type="email" placeholder="mail@example.com" autocomplete="email">
+          </label>
+
+          <label class="auth-field">
+            <span>Пароль</span>
+            <input class="auth-input" id="authPassword" type="password" placeholder="минимум 6 символов" autocomplete="current-password">
+          </label>
+
+          <div class="auth-message" id="authMessage">
+            Можно продолжать локально — вход нужен только для облачного сохранения.
+          </div>
+
+          <div class="auth-actions">
+            <button class="btn primary" id="signInBtn" type="button">Войти</button>
+            <button class="btn secondary" id="signUpBtn" type="button">Создать аккаунт</button>
+          </div>
+        </section>
+      `;
+
+      document.body.appendChild(modal);
+    }
+  }
+
+  function openAuthModal() {
+    const modal = byId('authModal');
+    if (!modal) return;
+
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+
+    const message = byId('authMessage');
+    if (message) {
+      message.classList.remove('is-error');
+      message.textContent = 'Можно продолжать локально — вход нужен только для облачного сохранения.';
+    }
+
+    setTimeout(() => byId('authEmail')?.focus(), 60);
+  }
+
+  function closeAuthModal() {
+    const modal = byId('authModal');
+    if (!modal) return;
+
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
   }
 
   function setStatus(text) {
-    const el = byId('authStatus');
-    if (el) el.textContent = text;
+    const status = byId('authStatus');
+
+    if (status) {
+      status.textContent = currentUser ? 'облако' : (hasConfig ? 'локально' : 'нет конфигурации');
+    }
+
+    const message = byId('authMessage');
+    if (message && text) {
+      message.textContent = text;
+      message.classList.remove('is-error');
+    }
+  }
+
+  function setError(text) {
+    const message = byId('authMessage');
+    if (!message) return;
+
+    message.textContent = text;
+    message.classList.add('is-error');
+  }
+
+  function setInfo(text) {
+    const message = byId('authMessage');
+    if (!message) return;
+
+    message.textContent = text;
+    message.classList.remove('is-error');
   }
 
   function updateAuthUI() {
-    const email = byId('authEmail');
-    const password = byId('authPassword');
-    const signIn = byId('signInBtn');
-    const signUp = byId('signUpBtn');
-    const signOut = byId('signOutBtn');
+    const openBtn = byId('authOpenBtn');
+    const userPill = byId('authUserPill');
+    const userEmail = byId('authUserEmail');
 
-    if (!email || !password || !signIn || !signUp || !signOut) return;
+    if (!openBtn || !userPill || !userEmail) return;
 
     if (currentUser) {
-      email.style.display = 'none';
-      password.style.display = 'none';
-      signIn.style.display = 'none';
-      signUp.style.display = 'none';
-      signOut.style.display = '';
-      setStatus(currentUser.email || 'вошёл');
+      openBtn.style.display = 'none';
+      userPill.style.display = 'inline-flex';
+      userEmail.textContent = currentUser.email || 'вошёл';
+      setStatus('Облачное сохранение включено');
     } else {
-      email.style.display = '';
-      password.style.display = '';
-      signIn.style.display = '';
-      signUp.style.display = '';
-      signOut.style.display = 'none';
-      setStatus(hasConfig ? 'локально' : 'Supabase не настроен');
+      openBtn.style.display = '';
+      userPill.style.display = 'none';
+      userEmail.textContent = '';
+      setStatus(hasConfig
+        ? 'Можно продолжать локально — вход нужен только для облачного сохранения.'
+        : 'Supabase не настроен: проверь src/supabase-config.js'
+      );
     }
   }
 
@@ -113,6 +203,7 @@
     if (!client) return;
 
     try {
+      setInfo('Создаём аккаунт...');
       const { email, password } = getAuthValues();
 
       const { data, error } = await client.auth.signUp({
@@ -126,14 +217,15 @@
       updateAuthUI();
 
       if (currentUser) {
-        setStatus('зарегистрирован');
+        setInfo('Аккаунт создан. Загружаю облачный прогресс...');
         await loadCloudProgress();
+        closeAuthModal();
       } else {
-        setStatus('проверь почту');
+        setInfo('Аккаунт создан. Проверь почту для подтверждения входа.');
       }
     } catch (error) {
       console.warn(error);
-      setStatus(error.message || 'ошибка регистрации');
+      setError(error.message || 'Ошибка регистрации');
     }
   }
 
@@ -141,6 +233,7 @@
     if (!client) return;
 
     try {
+      setInfo('Входим...');
       const { email, password } = getAuthValues();
 
       const { data, error } = await client.auth.signInWithPassword({
@@ -153,9 +246,10 @@
       currentUser = data.user || null;
       updateAuthUI();
       await loadCloudProgress();
+      closeAuthModal();
     } catch (error) {
       console.warn(error);
-      setStatus(error.message || 'ошибка входа');
+      setError(error.message || 'Ошибка входа');
     }
   }
 
@@ -166,13 +260,13 @@
 
     if (error) {
       console.warn('Ошибка выхода:', error.message);
-      setStatus('ошибка выхода');
+      setError('Ошибка выхода');
       return;
     }
 
     currentUser = null;
     updateAuthUI();
-    setStatus('локально');
+    setInfo('Можно продолжать локально — вход нужен только для облачного сохранения.');
   }
 
   async function loadCloudProgress() {
@@ -187,15 +281,15 @@
 
     if (error) {
       console.warn('Ошибка загрузки прогресса:', error.message);
-      setStatus('ошибка загрузки');
+      setError('Не удалось загрузить облачный прогресс');
       return;
     }
 
     if (data?.state_json && typeof onLoadProgress === 'function') {
       onLoadProgress(data.state_json);
-      setStatus('прогресс загружен');
+      setInfo('Облачный прогресс загружен');
     } else {
-      setStatus('облако пустое');
+      setInfo('Облачное сохранение подключено. Пока сохранений нет.');
     }
   }
 
@@ -218,11 +312,11 @@
 
     if (error) {
       console.warn('Ошибка сохранения прогресса:', error.message);
-      setStatus('ошибка сохранения');
+      setError('Ошибка сохранения прогресса');
       return;
     }
 
-    setStatus('сохранено');
+    setStatus('Сохранено в облаке');
   }
 
   function queueSave(storyId, state) {
@@ -249,11 +343,11 @@
 
     if (error) {
       console.warn('Ошибка сохранения результата:', error.message);
-      setStatus('результат не сохранён');
+      setError('Результат не сохранён');
       return;
     }
 
-    setStatus('результат сохранён');
+    setInfo('Результат сохранён в облаке');
   }
 
   async function init(options = {}) {
@@ -263,9 +357,21 @@
 
     client = createClient();
 
+    byId('authOpenBtn')?.addEventListener('click', openAuthModal);
+    byId('authCloseBtn')?.addEventListener('click', closeAuthModal);
+    byId('authBackdrop')?.addEventListener('click', closeAuthModal);
+
     byId('signUpBtn')?.addEventListener('click', signUp);
     byId('signInBtn')?.addEventListener('click', signIn);
     byId('signOutBtn')?.addEventListener('click', signOut);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAuthModal();
+    });
+
+    byId('authPassword')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') signIn();
+    });
 
     if (!client) {
       updateAuthUI();
