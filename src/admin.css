@@ -24,7 +24,7 @@
 .admin-card {
   position: relative;
   z-index: 1;
-  width: min(1120px, 100%);
+  width: min(1180px, 100%);
   max-height: min(760px, calc(100vh - 40px));
   overflow: hidden;
   display: grid;
@@ -35,6 +35,10 @@
   background: linear-gradient(135deg, rgba(22,42,72,.97), rgba(7,17,31,.99));
   border: 1px solid rgba(255,255,255,.12);
   box-shadow: 0 30px 90px rgba(0,0,0,.42);
+}
+
+.admin-dashboard-card {
+  width: min(1180px, 100%);
 }
 
 .admin-close {
@@ -101,6 +105,248 @@
   text-transform: uppercase;
 }
 
+.admin-results-btn {
+  white-space: nowrap;
+}
+
+.admin-dashboard {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-metric-card,
+.admin-panel,
+.admin-risk-card {
+  border-radius: 22px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.admin-metric-card {
+  padding: 16px;
+}
+
+.admin-metric-label,
+.admin-panel-head span,
+.admin-progress-caption,
+.admin-risk-caption,
+.admin-ending-percent {
+  color: rgba(255,255,255,.52);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.admin-metric-value {
+  margin-top: 8px;
+  font-size: clamp(28px, 3vw, 46px);
+  line-height: .9;
+  font-weight: 950;
+  letter-spacing: -.07em;
+}
+
+.admin-metric-caption {
+  margin-top: 8px;
+  color: rgba(255,255,255,.58);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 14px;
+}
+
+.admin-panel {
+  padding: 18px;
+  min-width: 0;
+}
+
+.admin-panel-large {
+  min-height: 270px;
+}
+
+.admin-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.admin-panel-head h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: .95;
+  letter-spacing: -.06em;
+}
+
+.admin-ending-bars,
+.admin-progress-list,
+.admin-risk-grid,
+.admin-recent-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-ending-row,
+.admin-progress-row {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-ending-head,
+.admin-progress-head,
+.admin-risk-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-ending-head b,
+.admin-progress-head b,
+.admin-risk-top b {
+  font-size: 16px;
+}
+
+.admin-ending-track,
+.admin-progress-track,
+.admin-risk-track {
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.admin-ending-track span,
+.admin-progress-track span,
+.admin-risk-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(78,168,222,.9), rgba(255,255,255,.7));
+}
+
+.admin-ending-row.good .admin-ending-track span {
+  background: linear-gradient(90deg, #24b47e, rgba(189,255,226,.92));
+}
+
+.admin-ending-row.ok .admin-ending-track span {
+  background: linear-gradient(90deg, #4ea8de, rgba(197,232,255,.92));
+}
+
+.admin-ending-row.mid .admin-ending-track span {
+  background: linear-gradient(90deg, #f5b841, rgba(255,237,184,.92));
+}
+
+.admin-ending-row.bad .admin-ending-track span {
+  background: linear-gradient(90deg, #d62839, rgba(255,184,194,.92));
+}
+
+.admin-risk-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-risk-card {
+  padding: 15px;
+}
+
+.admin-risk-track span {
+  background: linear-gradient(90deg, #d62839, #f5b841);
+}
+
+.admin-risk-card:nth-child(2) .admin-risk-track span,
+.admin-risk-card:nth-child(3) .admin-risk-track span {
+  background: linear-gradient(90deg, #24b47e, rgba(189,255,226,.92));
+}
+
+.admin-recent-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+  border-left: 4px solid rgba(255,255,255,.20);
+}
+
+.admin-recent-item.good {
+  border-left-color: #24b47e;
+}
+
+.admin-recent-item.ok {
+  border-left-color: #4ea8de;
+}
+
+.admin-recent-item.mid {
+  border-left-color: #f5b841;
+}
+
+.admin-recent-item.bad {
+  border-left-color: #d62839;
+}
+
+.admin-recent-item div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-recent-item b,
+.admin-recent-item span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.admin-recent-item b {
+  max-width: 220px;
+  font-size: 13px;
+}
+
+.admin-recent-item span {
+  color: rgba(255,255,255,.56);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.admin-recent-item strong {
+  font-size: 13px;
+  color: rgba(255,255,255,.82);
+}
+
+.admin-empty-state {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.54);
+  border-radius: 24px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  font-weight: 900;
+}
+
+/* Старую таблицу оставляем на всякий случай.
+   Если в admin.js снова вернётся таблица, она не будет выглядеть сломанной. */
+
 .admin-table-wrap {
   min-height: 0;
   overflow: auto;
@@ -145,8 +391,16 @@
   background: rgba(255,255,255,.045);
 }
 
-.admin-results-btn {
-  white-space: nowrap;
+@media (max-width: 980px) {
+  .admin-metrics-grid,
+  .admin-dashboard-grid,
+  .admin-risk-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-dashboard-grid .admin-panel {
+    min-height: auto;
+  }
 }
 
 @media (max-width: 720px) {
@@ -158,5 +412,26 @@
   .admin-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-metrics-grid,
+  .admin-dashboard-grid,
+  .admin-risk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-panel-head {
+    display: grid;
+  }
+
+  .admin-recent-item {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .admin-recent-item b {
+    max-width: 100%;
   }
 }
