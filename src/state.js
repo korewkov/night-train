@@ -38,9 +38,10 @@
       crisisResolved: false,
       tragedyFlag: false,
 
-      finished: false,
-      gameOver: false,
-      endingType: null
+   finished: false,
+gameOver: false,
+endingType: null,
+resultSaved: false
     };
   }
 
