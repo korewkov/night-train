@@ -22,8 +22,12 @@ const {
   return window.GameState.load(STORAGE_KEY);
 }
 
-  function save() {
+ function save() {
   window.GameState.save(STORAGE_KEY, state);
+
+  if (window.NightTrainCloud) {
+    window.NightTrainCloud.queueSave(ACTIVE_STORY, state);
+  }
 }
 
     function clampMoral(value) { return Math.max(-5, Math.min(8, value)); }
@@ -403,8 +407,12 @@ function applyStoryCovers() {
   if (!modal) return;
 
   state.finished = true;
-  state.endingType = getEnding();
-  save();
+state.endingType = getEnding();
+save();
+
+if (window.NightTrainCloud) {
+  window.NightTrainCloud.saveResult(ACTIVE_STORY, state.endingType, state);
+}
 
   const data = ENDINGS[state.endingType] || ENDINGS.po_raspisaniyu;
 
@@ -454,9 +462,25 @@ function runSelfTests() {
       byId('restartGameOverBtn').addEventListener('click', restart);
       byId('skipBtn').addEventListener('click', showEnding);
       byId('closeEndingBtn').addEventListener('click', () => byId('endingModal').classList.remove('show'));
-      runSelfTests();
+     runSelfTests();
+
+if (window.NightTrainCloud) {
+  window.NightTrainCloud.init({
+    onLoadProgress: (cloudState) => {
+      state = {
+        ...defaultState(),
+        ...cloudState
+      };
+
+      save();
       render();
-      showScreen('menu');
+      toast('Облачный прогресс загружен');
+    }
+  });
+}
+
+render();
+showScreen('menu');
     }
 
     if (document.readyState === 'loading') {
