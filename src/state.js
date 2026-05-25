@@ -1,8 +1,13 @@
 (function () {
   'use strict';
 
-  function createDefaultState() {
+  function getStoryStorageKey(storageKey, storyId) {
+    return `${storageKey}_${storyId || 'story-01'}`;
+  }
+
+  function createDefaultState(storyId = 'story-01') {
     return {
+      storyId,
       sceneId: 'prologue',
       selected: {},
       choiceOrders: {},
@@ -38,28 +43,53 @@
       crisisResolved: false,
       tragedyFlag: false,
 
-   finished: false,
-gameOver: false,
-endingType: null,
-resultSaved: false
+      finished: false,
+      gameOver: false,
+      endingType: null,
+      resultSaved: false
     };
   }
 
-  function load(storageKey) {
-    return window.GameStorage.load(storageKey, createDefaultState());
+  function normalizeState(savedState, storyId = 'story-01') {
+    return {
+      ...createDefaultState(storyId),
+      ...(savedState || {}),
+      storyId: savedState?.storyId || storyId
+    };
+  }
+
+  function load(storageKey, storyId = 'story-01') {
+    const defaultState = createDefaultState(storyId);
+    const storyStorageKey = getStoryStorageKey(storageKey, storyId);
+    const storyState = window.GameStorage.load(storyStorageKey, null);
+
+    if (storyState) {
+      return normalizeState(storyState, storyId);
+    }
+
+    if (storyId === 'story-01') {
+      const legacyState = window.GameStorage.load(storageKey, null);
+      if (legacyState) {
+        return normalizeState(legacyState, storyId);
+      }
+    }
+
+    return defaultState;
   }
 
   function save(storageKey, state) {
-    window.GameStorage.save(storageKey, state);
+    const storyId = state?.storyId || 'story-01';
+    window.GameStorage.save(getStoryStorageKey(storageKey, storyId), normalizeState(state, storyId));
   }
 
-  function reset(storageKey) {
-    window.GameStorage.reset(storageKey);
-    return createDefaultState();
+  function reset(storageKey, storyId = 'story-01') {
+    window.GameStorage.reset(getStoryStorageKey(storageKey, storyId));
+    return createDefaultState(storyId);
   }
 
   window.GameState = {
     createDefaultState,
+    getStoryStorageKey,
     load,
     save,
     reset
