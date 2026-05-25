@@ -5,6 +5,7 @@
     return {
       sceneId: 'prologue',
       selected: {},
+      choiceOrders: {},
       debuffs: [],
       storyPath: [],
 
