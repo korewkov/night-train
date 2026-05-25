@@ -443,17 +443,19 @@ function getChoiceOrder(scene) {
       byId('gameOverModal').classList.add('show');
     }
 
-   function showEnding() {
+ function showEnding() {
   const modal = byId('endingModal');
   if (!modal) return;
 
   state.finished = true;
-state.endingType = getEnding();
-save();
+  state.endingType = state.endingType || getEnding();
 
-if (window.NightTrainCloud) {
-  window.NightTrainCloud.saveResult(ACTIVE_STORY, state.endingType, state);
-}
+  if (window.NightTrainCloud && !state.resultSaved) {
+    window.NightTrainCloud.saveResult(ACTIVE_STORY, state.endingType, state);
+    state.resultSaved = true;
+  }
+
+  save();
 
   const data = ENDINGS[state.endingType] || ENDINGS.po_raspisaniyu;
 
