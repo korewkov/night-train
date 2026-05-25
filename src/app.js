@@ -423,55 +423,21 @@ function restart() {
   render();
   toast('Первый рейс начался заново');
 }
+function runSelfTests() {
+  if (!window.GameTests) return;
 
-    function runSelfTests() {
-      console.group('Первый рейс · self-tests');
-      console.assert(Boolean(scenes.prologue && scenes.final_scene), 'Ключевые сцены существуют');
-   console.assert(window.GameMedia.getScenePhotoPath(scenes.prologue) === 'assets/images/scenes/story-01/01.webp', 'Первый кадр истории ищет webp');
-console.assert(window.GameMedia.getScenePhotoPath(scenes.boarding_help) === 'assets/images/scenes/story-01/02.webp', 'Последствия посадки используют кадр 02');
-console.assert(window.GameMedia.getScenePhotoPath(scenes.masha_document) === 'assets/images/scenes/story-01/04.webp', 'Блок Маши использует кадр 04');
-console.assert(window.GameMedia.getScenePhotoPath(scenes.final_scene) === 'assets/images/scenes/story-01/12.webp', 'Финал использует кадр 12');
-
-      const originalState = JSON.parse(JSON.stringify(state));
-
-      state = defaultState();
-      state.mashaDocumentFixed = true;
-      console.assert(resolveNextSceneId(scenes.inspector) === 'inspector_good', 'Исправленные документы Маши проходят ревизора');
-
-      state = defaultState();
-      state.mashaDocumentHidden = true;
-      state.fatalDocumentViolation = true;
-      console.assert(resolveNextSceneId(scenes.inspector) === 'inspector_problem', 'Скрытая ошибка Маши ведёт к остановке рейса');
-      console.assert(scenes.inspector_problem.gameOver === true, 'Скрытая ошибка Маши ведёт к проигрышу');
-
-      state = defaultState();
-      state.sceneId = 'boarding';
-      state.selected = { boarding: 0 };
-      console.assert(resolveNextSceneId(scenes.boarding) === 'boarding_help', 'Первый выбор посадки ведёт в ветку помощи');
-
-      state = defaultState();
-      state.empathy = 4;
-      state.conscience = 2;
-      state.courage = 3;
-      state.crisisResolved = true;
-      state.helpedIlya = true;
-      state.mashaDocumentFixed = true;
-      state.helpedMother = true;
-      state.olegTrust = 2;
-      console.assert(getEnding() === 'provodnik', 'Хороший маршрут ведёт в финал «Проводник»');
-
-      state = defaultState();
-      state.empathy = 2;
-      state.conscience = 1;
-      state.courage = 2;
-      state.crisisResolved = true;
-      state.helpedIlya = true;
-      state.mashaDocumentFixed = true;
-      console.assert(getEnding() === 'vtoroy_shans', 'Ответственный смешанный маршрут ведёт во второй шанс');
-
-      state = originalState;
-      console.groupEnd();
+  window.GameTests.runSelfTests({
+    scenes,
+    defaultState,
+    resolveNextSceneId,
+    getEnding,
+    getScenePhotoPath: window.GameMedia.getScenePhotoPath,
+    getCurrentState: () => state,
+    setCurrentState: (nextState) => {
+      state = nextState;
     }
+  });
+}
 
     function init() {
       renderStoryCards();
