@@ -136,7 +136,40 @@ function applyStoryCovers() {
     function currentScene() {
       return scenes[state.sceneId] || scenes.prologue;
     }
+function shuffleIndexes(length) {
+  const indexes = Array.from({ length }, (_, index) => index);
 
+  for (let i = indexes.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+
+  return indexes;
+}
+
+function getChoiceOrder(scene) {
+  if (!scene || !Array.isArray(scene.choices)) return [];
+
+  if (!state.choiceOrders || typeof state.choiceOrders !== 'object') {
+    state.choiceOrders = {};
+  }
+
+  const sceneId = state.sceneId;
+  const savedOrder = state.choiceOrders[sceneId];
+  const isValidSavedOrder =
+    Array.isArray(savedOrder) &&
+    savedOrder.length === scene.choices.length &&
+    savedOrder.every((index) => Number.isInteger(index) && index >= 0 && index < scene.choices.length);
+
+  if (isValidSavedOrder) {
+    return savedOrder;
+  }
+
+  const nextOrder = shuffleIndexes(scene.choices.length);
+  state.choiceOrders[sceneId] = nextOrder;
+
+  return nextOrder;
+}
     function getCrisisSceneId() {
   return window.GameLogic.getCrisisSceneId(state);
 }
@@ -270,50 +303,58 @@ function applyStoryCovers() {
     }
 
     function renderChoices(scene) {
-      const choices = byId('choices');
-      const continueRow = byId('continueRow');
-      if (!choices || !continueRow) return;
+  const choices = byId('choices');
+  const continueRow = byId('continueRow');
+  if (!choices || !continueRow) return;
 
-      const selected = state.selected[state.sceneId];
-      choices.innerHTML = '';
-      continueRow.style.display = 'none';
+  const selected = state.selected[state.sceneId];
+  choices.innerHTML = '';
+  continueRow.style.display = 'none';
 
-      if (scene.gameOver) {
-        const btn = document.createElement('button');
-        btn.className = 'btn primary';
-        btn.textContent = 'Начать заново';
-        btn.addEventListener('click', showGameOver);
-        choices.appendChild(btn);
-        return;
-      }
+  if (scene.gameOver) {
+    const btn = document.createElement('button');
+    btn.className = 'btn primary';
+    btn.textContent = 'Начать заново';
+    btn.addEventListener('click', showGameOver);
+    choices.appendChild(btn);
+    return;
+  }
 
-      if (scene.final) {
-        const btn = document.createElement('button');
-        btn.className = 'btn primary';
-        btn.textContent = 'Посмотреть финал';
-        btn.addEventListener('click', showEnding);
-        choices.appendChild(btn);
-        return;
-      }
+  if (scene.final) {
+    const btn = document.createElement('button');
+    btn.className = 'btn primary';
+    btn.textContent = 'Посмотреть финал';
+    btn.addEventListener('click', showEnding);
+    choices.appendChild(btn);
+    return;
+  }
 
-      if (!scene.choices) {
-        continueRow.style.display = 'flex';
-        return;
-      }
+  if (!scene.choices) {
+    continueRow.style.display = 'flex';
+    return;
+  }
 
-      if (selected !== undefined) {
-        continueRow.style.display = 'flex';
-        return;
-      }
+  if (selected !== undefined) {
+    continueRow.style.display = 'flex';
+    return;
+  }
 
-      scene.choices.forEach((choice, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'choice';
-        btn.innerHTML = `<span class="choice-num">${String(index + 1).padStart(2, '0')}</span><strong>${choice.title}</strong>`;
-        btn.addEventListener('click', () => choose(index));
-        choices.appendChild(btn);
-      });
-    }
+  const choiceOrder = getChoiceOrder(scene);
+
+  choiceOrder.forEach((originalChoiceIndex, visualIndex) => {
+    const choice = scene.choices[originalChoiceIndex];
+    if (!choice) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = `
+      <span class="choice-num">${String(visualIndex + 1).padStart(2, '0')}</span>
+      <strong>${choice.title}</strong>
+    `;
+    btn.addEventListener('click', () => choose(originalChoiceIndex));
+    choices.appendChild(btn);
+  });
+}
 
     function choose(choiceIndex) {
       const scene = currentScene();
