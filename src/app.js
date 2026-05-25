@@ -521,7 +521,9 @@ if (window.NightTrainCloud) {
     }
   });
 }
-
+if (window.NightTrainAdmin) {
+  window.NightTrainAdmin.init();
+}
 render();
 showScreen('menu');
     }
