@@ -225,6 +225,32 @@
       scenes[sceneId].story = scenes[sceneId].story || ACTIVE_STORY;
       scenes[sceneId].photoIndex = scenes[sceneId].photoIndex || SCENE_PHOTO_INDEX_BY_ID[sceneId] || index + 1;
     });
+  const ENDINGS = {
+  provodnik: {
+    title: 'Проводник',
+    text: 'Артём справился с первым рейсом. Не потому что всё сделал идеально, а потому что видел людей, не скрывал ошибки и не ушёл от кризиса.'
+  },
+
+  po_raspisaniyu: {
+    title: 'По расписанию',
+    text: 'Рейс завершён. Формально всё доведено до конца, но в решениях Артёма было больше порядка, чем живого участия. Следующий рейс должен быть сильнее.'
+  },
+
+  ne_dopushen: {
+    title: 'Не допущен',
+    text: 'Форма оказалась тяжелее, чем Артём думал. Он слишком часто прятался за неё, когда рядом были живые люди.'
+  },
+
+  oboydetsya: {
+    title: 'Обойдётся',
+    text: 'Техническая остановка. Холодный свет. Рация трещит. Самая опасная фраза в этой работе оказалась простой: “я думал, обойдётся”.'
+  },
+
+  vtoroy_shans: {
+    title: 'Следующий рейс',
+    text: 'Артём ошибался, но не провалил рейс. Он смог признать часть решений, удержать кризис и получить право на следующий рейс.'
+  }
+};
 window.GameData = {
   STORAGE_KEY,
   ACTIVE_STORY,
@@ -234,6 +260,7 @@ window.GameData = {
   STORY_LIBRARY,
   characters,
   scenes,
-  SCENE_PHOTO_INDEX_BY_ID
+  SCENE_PHOTO_INDEX_BY_ID,
+  ENDINGS
 };
     })();
